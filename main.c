@@ -177,7 +177,8 @@ void inversion(unsigned char *vec, size_t bits)
 
 
 
-void shiftLeft(unsigned char *vec, size_t bits, size_t k) {
+void shiftLeft(unsigned char *vec, size_t bits, size_t k)
+{
     if (vec && bits && k > 0)
     {
 
@@ -212,7 +213,7 @@ void shiftLeft(unsigned char *vec, size_t bits, size_t k) {
         size_t remaining_bits = bits % 8;
         if (remaining_bits != 0)
         {
-            unsigned char mask = (1u << remaining_bits) - 1;
+            unsigned char mask = (1 << remaining_bits) - 1;
             vec[bytes - 1] &= mask;
         }
     }
@@ -292,16 +293,15 @@ int main()
     size_t bitsB = 0;
     unsigned char* vec1 = convertStrToLongBv(text1, &bitsA);
     unsigned char* vec2 = convertStrToLongBv(text2, &bitsB);
+    printLongBv(vec1, bitsA);
     inversion(vec1, bitsA);
     printLongBv(vec1, bitsA);
-    unsigned char* res = sumMod2(vec1, bitsA, vec2, bitsB);
-    printLongBv(res, bitsA);
+    shiftLeft(vec1, bitsA, 4);
+    printLongBv(vec1, bitsA);
     free(vec1);
     vec1 = NULL;
     free(vec2);
     vec2 = NULL;
-    free(res);
-    res = NULL;
     return 0;
 }
 
