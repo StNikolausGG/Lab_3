@@ -179,16 +179,16 @@ void shiftLeft(unsigned char *vec, size_t bits, size_t k)
     if (vec && bits && k > 0)
     {
             size_t bytes = ((bits - 1) / 8) + 1;
-            size_t j = k / 8;
+            size_t byte_sdvig = k / 8;
             size_t i = 0;
             size_t iy = bytes - 1;
-            if (j)
+            if (byte_sdvig)
             {
-                while (j < bytes)
+                while (byte_sdvig < bytes)
                 {
-                    vec[i] = vec[j];
+                    vec[i] = vec[byte_sdvig];
                     i++;
-                    j++;
+                    byte_sdvig++;
                 }
                 iy = i - 1;
                 while (i < bytes)
@@ -197,8 +197,9 @@ void shiftLeft(unsigned char *vec, size_t bits, size_t k)
                     i++;
                 }
             }
+
             size_t bit = k % 8;
-            size_t _bit = 8 - bit;
+            size_t ost_bit = 8 - bit;
             unsigned char ib = 0;
             unsigned char mask = -1;
             size_t ix = 0;
@@ -209,9 +210,9 @@ void shiftLeft(unsigned char *vec, size_t bits, size_t k)
                 {
                     mask = -1;
                     vec[ix] = vec[ix] >> bit;
-                    mask = mask >> _bit;
+                    mask = mask >> ost_bit;
                     ib = vec[ix + 1] & mask;
-                    ib = ib << _bit;
+                    ib = ib << ost_bit;
                     vec[ix] = vec[ix] | ib;
                 }
                 vec[ix] = vec[ix] >> bit;
@@ -228,13 +229,13 @@ void shiftRight(unsigned char *vec, size_t bits, size_t k)
     {
 
         size_t bytes = ((bits - 1) / 8) + 1;
-        size_t ix = k / 8;
+        size_t byte_sdvig = k / 8;
         size_t j = bytes - 1;
-        size_t i = j - ix;
+        size_t i = j - byte_sdvig;
 
-        if (ix)
+        if (byte_sdvig)
         {
-            if (j > ix)
+            if (j > byte_sdvig)
             {
                 while (i > 0)
                 {
@@ -245,7 +246,7 @@ void shiftRight(unsigned char *vec, size_t bits, size_t k)
                 vec[j] = vec[i];
             }
             i = 0;
-            while (i < ix)
+            while (i < byte_sdvig)
             {
                 vec[i] = 0;
                 i++;
@@ -259,14 +260,14 @@ void shiftRight(unsigned char *vec, size_t bits, size_t k)
         unsigned char mask = -1;
         if (bit)
         {
-            for (; ix < bytes; ix++)
+            for (; byte_sdvig < bytes; byte_sdvig++)
             {
                 mask = -1;
                 mask = mask << _bit;
-                iby = vec[ix] & mask;
+                iby = vec[byte_sdvig] & mask;
                 iby = iby >> _bit;
-                vec[ix] = vec[ix] << bit;
-                vec[ix] = vec[ix] | ibx;
+                vec[byte_sdvig] = vec[byte_sdvig] << bit;
+                vec[byte_sdvig] = vec[byte_sdvig] | ibx;
                 ibx = iby;
             }
         }
@@ -324,36 +325,57 @@ int main()
 //    vec2 = NULL;
 
     //Логические Mul, Sum, SumMod2, set0/1
-    char text1[256] = "11111111000000001111111100000000";
-    char text2[256] = "1110001";
-    size_t bitsA = 0;
-    size_t bitsB = 0;
-    unsigned char* vec1 = convertStrToLongBv(text1, &bitsA);
-    unsigned char* vec2 = convertStrToLongBv(text2, &bitsB);
-    printf("vec1 in BV: ");
-    printLongBv(vec1, bitsA);
-    printf("vec2 in BV: ");
-    printLongBv(vec2, bitsB);
+//    char text1[256] = "10111000";
+//    char text2[256] = "11100010";
+//    size_t bitsA = 0;
+//    size_t bitsB = 0;
+//    unsigned char* vec1 = convertStrToLongBv(text1, &bitsA);
+//    unsigned char* vec2 = convertStrToLongBv(text2, &bitsB);
+//    printf("vec1 in BV: ");
+//    printLongBv(vec1, bitsA);
+//    printf("vec2 in BV: ");
+//    printLongBv(vec2, bitsB);
 
 //    unsigned char* res1 = logMul(vec1, bitsA, vec2, bitsB);
 //    unsigned char* res2 = logSum(vec1, bitsA, vec2, bitsB);
 //    unsigned char* res3 = sumMod2(vec1, bitsA, vec2, bitsB);
 
-//    if (res1 && res2 && res3)
+//    if (res1)
 //    {
 //        printf("logMul: ");
 //        printLongBv(res1, bitsA);
+//    }
+//    else
+//    {
+//        printf("Incorrect input data");
+//    }
+
+//    if (res2)
+//    {
 //        printf("logSum: ");
 //        printLongBv(res2, bitsA);
+//    }
+//    else
+//    {
+//        printf("Incorrect input data");
+//    }
+
+//    if (res3)
+//    {
 //        printf("sumMod2: ");
 //        printLongBv(res3, bitsA);
-//        set0(vec1, bitsA, 2);
-//        set1(vec1, bitsA, 1);
-//        printf("vec1 after set bit 0: ");
-//        printLongBv(vec1, bitsA);
-//        printf("vec2 after set bit 1: ");
-//        printLongBv(vec2, bitsB);
 //    }
+//    else
+//    {
+//        printf("Incorrect input data");
+//    }
+
+//    set0(vec1, bitsA, 2);
+//    set1(vec2, bitsB, 7);
+//    printf("vec1 after set bit 0: ");
+//    printLongBv(vec1, bitsA);
+//    printf("vec2 after set bit 1: ");
+//    printLongBv(vec2, bitsB);
 
 //    free(res1);
 //    res1 = NULL;
@@ -366,15 +388,23 @@ int main()
 //    free(vec2);
 //    vec2 = NULL;
 
+    //Инверсия и сдвиги (<< >>)
 
-    //inversion(vec1, bitsA);
-    //printLongBv(vec1, bitsA);
-    shiftRight(vec1, bitsA, 16);
-    printLongBv(vec1, bitsA);
-    free(vec1);
-    vec1 = NULL;
-    free(vec2);
-    vec2 = NULL;
+    //char text1[256] = "0000111010101"; //13 символов
+    char text1[256] = "0000111111110000";
+    size_t bitsA = 0;
+    unsigned char* vec = convertStrToLongBv(text1, &bitsA);
+    inversion(vec, bitsA);
+    printf("Inversion: ");
+    printLongBv(vec, bitsA);
+    shiftRight(vec, bitsA, 8);
+    printf("ShiftRight: ");
+    printLongBv(vec, bitsA);
+    shiftLeft(vec, bitsA, 9);
+    printf("ShiftLeft: ");
+    printLongBv(vec, bitsA);
+    free(vec);
+    vec = NULL;
     return 0;
 }
 
