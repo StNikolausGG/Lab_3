@@ -71,7 +71,6 @@ char* convertLongBvToStr(unsigned char* vec, size_t bits)
     return str;
 }
 
-
 void printLongBv(unsigned char* vec, size_t bits)
 {
     size_t bytes = 0;
@@ -175,89 +174,101 @@ void inversion(unsigned char *vec, size_t bits)
     }
 }
 
-
-
 void shiftLeft(unsigned char *vec, size_t bits, size_t k)
+{
+    if (vec && bits && k > 0)
+    {
+            size_t bytes = ((bits - 1) / 8) + 1;
+            size_t j = k / 8;
+            size_t i = 0;
+            size_t iy = bytes - 1;
+            if (j)
+            {
+                while (j < bytes)
+                {
+                    vec[i] = vec[j];
+                    i++;
+                    j++;
+                }
+                iy = i - 1;
+                while (i < bytes)
+                {
+                    vec[i] = 0;
+                    i++;
+                }
+            }
+            size_t bit = k % 8;
+            size_t _bit = 8 - bit;
+            unsigned char ib = 0;
+            unsigned char mask = -1;
+            size_t ix = 0;
+
+            if (bit)
+            {
+                for (ix = 0; ix < iy; ix++)
+                {
+                    mask = -1;
+                    vec[ix] = vec[ix] >> bit;
+                    mask = mask >> _bit;
+                    ib = vec[ix + 1] & mask;
+                    ib = ib << _bit;
+                    vec[ix] = vec[ix] | ib;
+                }
+                vec[ix] = vec[ix] >> bit;
+            }
+            mask = -1;
+            mask = mask >> (bytes * 8 - bits);
+            vec[bytes - 1] = vec[bytes - 1] & mask;
+        }
+}
+
+void shiftRight(unsigned char *vec, size_t bits, size_t k)
 {
     if (vec && bits && k > 0)
     {
 
         size_t bytes = ((bits - 1) / 8) + 1;
-        size_t byte_shift = k / 8;
-        size_t bit_shift = k % 8;
+        size_t ix = k / 8;
+        size_t j = bytes - 1;
+        size_t i = j - ix;
 
-        if (byte_shift > 0)
+        if (ix)
         {
-               for (size_t i = 0; i < bytes - byte_shift; i++)
-               {
-                   vec[i] = vec[i + byte_shift];
-               }
-               for (size_t i = bytes - byte_shift; i < bytes; i++)
-               {
-                   vec[i] = 0;
-               }
-           }
-           if (bit_shift > 0)
-           {
-               unsigned char carry = 0;
-               for (size_t i = bytes - 1; i >= 0; i--)
-               {
-                   unsigned char current = vec[i];
-                   unsigned char prev_carry = current << (8 - bit_shift);
-
-                   vec[i] = (current >> bit_shift) | carry;
-                   carry = prev_carry;
-               }
-           }
-
-
-        size_t remaining_bits = bits % 8;
-        if (remaining_bits != 0)
-        {
-            unsigned char mask = (1 << remaining_bits) - 1;
-            vec[bytes - 1] = vec[bytes - 1] & mask;
-        }
-    }
-
-}
-
-void shiftRight(unsigned char *vec, size_t bits, size_t k) {
-    if (vec && bits && k > 0)
-    {
-
-        size_t bytes = ((bits - 1) / 8) + 1;
-        size_t byte_shift = k / 8;
-        size_t bit_shift = k % 8;
-
-        if (byte_shift > 0)
-        {
-                for (size_t i = bytes - 1; i >= byte_shift; i--)
-                {
-                    vec[i] = vec[i - byte_shift];
-                }
-                for (size_t i = 0; i < byte_shift; i++)
-                {
-                    vec[i] = 0;
-                }
-        }
-
-        if (bit_shift > 0)
-        {
-            unsigned char carry = 0;
-            for (size_t i = 0; i < bytes; i++)
+            if (j > ix)
             {
-                unsigned char current = vec[i];
-                unsigned char next_carry = current >> (8 - bit_shift);
-                vec[i] = (current << bit_shift) | carry;
-                carry = next_carry;
+                while (i > 0)
+                {
+                    vec[j] = vec[i];
+                    i--;
+                    j--;
+                }
+                vec[j] = vec[i];
+            }
+            i = 0;
+            while (i < ix)
+            {
+                vec[i] = 0;
+                i++;
             }
         }
 
-        size_t remaining_bits = bits % 8;
-        if (remaining_bits != 0)
+        size_t bit = k % 8;
+        size_t _bit = 8 - bit;
+        unsigned char ibx = 0;
+        unsigned char iby = 0;
+        unsigned char mask = -1;
+        if (bit)
         {
-            unsigned char mask = (1 << remaining_bits) - 1;
-            vec[bytes - 1] = vec[bytes - 1] & mask;
+            for (; ix < bytes; ix++)
+            {
+                mask = -1;
+                mask = mask << _bit;
+                iby = vec[ix] & mask;
+                iby = iby >> _bit;
+                vec[ix] = vec[ix] << bit;
+                vec[ix] = vec[ix] | ibx;
+                ibx = iby;
+            }
         }
     }
 }
@@ -288,39 +299,82 @@ void set1 (unsigned char* vec, size_t bits, size_t k)
 
 int main()
 {
-//    char text[] = "0000000000000000000000000000000000000000000000000011111111111111111111111111111111111111111111111111";
-//    size_t bits = 0;
-//    unsigned char* vec = convertStrToLongBv(text, &bits);
-//    inversion(vec, bits);
-//    printLongBv(vec, bits);
-//    free(vec);
-//    vec = NULL;
+    //Конвертация str to BV, printBV, конвертация BV to str
+//    char text1[256] = "0110110101"; //10 Символов 2 байта не кратно 8
+//    char text2[256] = "11100011"; //8 Символов 1 байт кратно 8
+//    size_t bitsA = 0;
+//    size_t bitsB = 0;
+//    unsigned char* vec1 = convertStrToLongBv(text1, &bitsA);
+//    unsigned char* vec2 = convertStrToLongBv(text2, &bitsB);
+//    printf("vec1 in BV: ");
+//    printLongBv(vec1, bitsA);
+//    printf("vec2 in BV: ");
+//    printLongBv(vec2, bitsB);
+//    char* res1 = convertLongBvToStr(vec1, bitsA);
+//    char* res2 = convertLongBvToStr(vec2, bitsB);
+//    printf("%s\n", res1);
+//    printf("%s", res2);
+//    free(res1);
+//    res1 = NULL;
+//    free(res2);
+//    res2 = NULL;
+//    free(vec1);
+//    vec1 = NULL;
+//    free(vec2);
+//    vec2 = NULL;
 
-    char text1[256] = "0110110101";
-    char text2[256] = "0110110101";
+    //Логические Mul, Sum, SumMod2, set0/1
+    char text1[256] = "11111111000000001111111100000000";
+    char text2[256] = "1110001";
     size_t bitsA = 0;
     size_t bitsB = 0;
     unsigned char* vec1 = convertStrToLongBv(text1, &bitsA);
     unsigned char* vec2 = convertStrToLongBv(text2, &bitsB);
+    printf("vec1 in BV: ");
     printLongBv(vec1, bitsA);
-    shiftLeft(vec1, bitsA, 1);
+    printf("vec2 in BV: ");
+    printLongBv(vec2, bitsB);
+
+//    unsigned char* res1 = logMul(vec1, bitsA, vec2, bitsB);
+//    unsigned char* res2 = logSum(vec1, bitsA, vec2, bitsB);
+//    unsigned char* res3 = sumMod2(vec1, bitsA, vec2, bitsB);
+
+//    if (res1 && res2 && res3)
+//    {
+//        printf("logMul: ");
+//        printLongBv(res1, bitsA);
+//        printf("logSum: ");
+//        printLongBv(res2, bitsA);
+//        printf("sumMod2: ");
+//        printLongBv(res3, bitsA);
+//        set0(vec1, bitsA, 2);
+//        set1(vec1, bitsA, 1);
+//        printf("vec1 after set bit 0: ");
+//        printLongBv(vec1, bitsA);
+//        printf("vec2 after set bit 1: ");
+//        printLongBv(vec2, bitsB);
+//    }
+
+//    free(res1);
+//    res1 = NULL;
+//    free(res2);
+//    res2 = NULL;
+//    free(res3);
+//    res3 = NULL;
+//    free(vec1);
+//    vec1 = NULL;
+//    free(vec2);
+//    vec2 = NULL;
+
+
+    //inversion(vec1, bitsA);
+    //printLongBv(vec1, bitsA);
+    shiftRight(vec1, bitsA, 16);
     printLongBv(vec1, bitsA);
     free(vec1);
     vec1 = NULL;
     free(vec2);
     vec2 = NULL;
-    return 0;
-
-
-
-//    inversion(vec1, bitsA);
-//    printLongBv(vec1, bitsA);
-//    shiftLeft(vec1, bitsA, 4);
-//    printLongBv(vec1, bitsA);
-//    free(vec1);
-//    vec1 = NULL;
-//    free(vec2);
-//    vec2 = NULL;
     return 0;
 }
 
