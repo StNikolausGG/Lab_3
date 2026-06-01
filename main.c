@@ -200,7 +200,7 @@ void shiftLeft(unsigned char *vec, size_t bits, size_t k)
 
             size_t bit = k % 8;
             size_t ost_bit = 8 - bit;
-            unsigned char ib = 0;
+            unsigned char buff = 0;
             unsigned char mask = -1;
             size_t ix = 0;
 
@@ -211,9 +211,9 @@ void shiftLeft(unsigned char *vec, size_t bits, size_t k)
                     mask = -1;
                     vec[ix] = vec[ix] >> bit;
                     mask = mask >> ost_bit;
-                    ib = vec[ix + 1] & mask;
-                    ib = ib << ost_bit;
-                    vec[ix] = vec[ix] | ib;
+                    buff = vec[ix + 1] & mask;
+                    buff = buff << ost_bit;
+                    vec[ix] = vec[ix] | buff;
                 }
                 vec[ix] = vec[ix] >> bit;
             }
@@ -255,8 +255,8 @@ void shiftRight(unsigned char *vec, size_t bits, size_t k)
 
         size_t bit = k % 8;
         size_t _bit = 8 - bit;
-        unsigned char ibx = 0;
-        unsigned char iby = 0;
+        unsigned char ix = 0;
+        unsigned char iy = 0;
         unsigned char mask = -1;
         if (bit)
         {
@@ -264,11 +264,11 @@ void shiftRight(unsigned char *vec, size_t bits, size_t k)
             {
                 mask = -1;
                 mask = mask << _bit;
-                iby = vec[byte_sdvig] & mask;
-                iby = iby >> _bit;
+                iy = vec[byte_sdvig] & mask;
+                iy = iy >> _bit;
                 vec[byte_sdvig] = vec[byte_sdvig] << bit;
-                vec[byte_sdvig] = vec[byte_sdvig] | ibx;
-                ibx = iby;
+                vec[byte_sdvig] = vec[byte_sdvig] | ix;
+                ix = iy;
             }
         }
     }
